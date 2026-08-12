@@ -1,4 +1,4 @@
-# vendors-portal
+# Vendor Portal
 
 ## Overview
 
