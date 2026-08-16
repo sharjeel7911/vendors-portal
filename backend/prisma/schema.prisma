@@ -22,16 +22,18 @@ model deliveries {
 }
 
 model drivers {
-  id               Int      @id @default(autoincrement())
-  name             String   @db.VarChar
-  vendor_id        Int
-  phone            String   @db.VarChar
-  liscence_no      String   @db.VarChar
-  working_hours    String   @db.VarChar
-  status           String   @db.VarChar
-  current_location String   @db.VarChar
-  created_at       DateTime @default(now()) @db.Timestamp(6)
-  routes           routes[]
+  id            Int      @id @default(autoincrement())
+  name          String   @db.VarChar
+  vendor_id     Int
+  phone         String   @db.VarChar
+  liscence_no   String   @db.VarChar
+  working_hours String   @db.VarChar
+  status        String   @db.VarChar
+  created_at    DateTime @default(now()) @db.Timestamp(6)
+  vehicle_id    Int?
+  latitude      Float
+  longitude     Float
+  routes        routes[]
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -108,14 +110,15 @@ model routes {
 }
 
 model vehicles {
-  id         Int      @id @default(autoincrement())
-  vendor_id  Int
-  type       String   @db.VarChar
-  capacity   Int
-  depot      String   @db.VarChar
-  plate_no   String   @db.VarChar
-  created_at DateTime @default(now()) @db.Timestamp(6)
-  routes     routes[]
+  id          Int      @id @default(autoincrement())
+  vendor_id   Int
+  type        String   @db.VarChar
+  capacity    Int
+  depot       String   @db.VarChar
+  plate_no    String   @db.VarChar
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  isAvailable Boolean  @default(true)
+  routes      routes[]
 }
 
 model vendor {
@@ -154,4 +157,12 @@ model vendors {
   routes         routes[]
   vendor_users   vendor_users[]
   plans          plans?          @relation(fields: [plan_id], references: [id], onUpdate: NoAction)
+}
+
+model refresh_tokens {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  token_hash String   @db.VarChar
+  expires_at DateTime @db.Timestamp(6)
+  created_at DateTime @default(now()) @db.Timestamp(6)
 }
