@@ -85,3 +85,18 @@ npx prisma generate
 ---
 
 Happy coding! 🚀
+
+1. GET /api/routes/summary 
+2. GET /api/routes 
+3. GET /api/drivers 
+4. GET /api/drivers/locations 
+5. GET /api/vehicles 
+6. GET /api/stops 
+7. GET /api/routes/1 
+8. GET /api/routes/1/map 
+9. POST /api/routes 
+10. PATCH /api/routes/:routeId/driver 
+11. PATCH /api/routes/:routeId/vehicle 
+12. PATCH /api/routes/:routeId/status 
+13. POST /api/routes/:routeId/dispatch 
+14. POST /api/routes/optimize

@@ -4,6 +4,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
+import { RoutesModule } from './routes/routes.module';
+import { DriversModule } from './drivers/drivers.module';
+import { OrdersModule } from './orders/orders.module';
+import { VehiclesModule } from './vehicles/vehicles.module';
 
 @Module({
   imports: [
@@ -12,6 +16,10 @@ import { AuthModule } from './auth/auth.module';
     }),
     PrismaModule,
     AuthModule,
+    RoutesModule,
+    DriversModule,
+    OrdersModule,
+    VehiclesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
