@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model deliveries {
+  id           Int       @id @default(autoincrement())
+  route_id     Int?
+  order_id     Int?
+  sequence     Int?
+  eta          DateTime? @db.Timestamp(6)
+  delivered_at DateTime? @db.Timestamp(6)
+  proof_url    String?   @db.VarChar
+  status       String    @default("pending") @db.VarChar
+  created_at   DateTime? @db.Timestamp(6)
+  orders       orders?   @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  routes       routes?   @relation(fields: [route_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model drivers {
+  id            Int      @id @default(autoincrement())
+  name          String   @db.VarChar
+  vendor_id     Int
+  phone         String   @db.VarChar
+  liscence_no   String   @db.VarChar
+  working_hours String   @db.VarChar
+  status        String   @db.VarChar
+  created_at    DateTime @default(now()) @db.Timestamp(6)
+  vehicle_id    Int?
+  latitude      Float
+  longitude     Float
+  routes        routes[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model invoices {
+  id        Int       @id
+  vendor_id Int?
+  plan_id   Int?
+  amount    Int?
+  status    String    @default("unpaid") @db.VarChar
+  issued_at DateTime  @default(now()) @db.Timestamp(6)
+  paid_at   DateTime? @db.Timestamp(6)
+  plans     plans?    @relation(fields: [plan_id], references: [id], onUpdate: NoAction)
+  vendors   vendors?  @relation(fields: [vendor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model notifications {
+  id           Int       @id
+  vendor_id    Int?
+  recipient_id Int?
+  type         String?   @db.VarChar
+  message      String?   @db.VarChar
+  sent_at      DateTime? @db.Timestamp(6)
+  status       String?   @default("pending") @db.VarChar
+  created_at   DateTime? @db.Timestamp(6)
+  vendors      vendors?  @relation(fields: [vendor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model orders {
+  id            Int          @id @default(autoincrement())
+  vendor_id     Int?
+  customer_name String?      @db.VarChar
+  address       String?      @db.VarChar
+  coordinates   String?      @db.VarChar
+  time_window   String?      @db.VarChar
+  priority      String?      @default("normal") @db.VarChar
+  weight        Int?
+  notes         String?      @db.VarChar
+  status        String       @default("pending") @db.VarChar
+  created_at    DateTime?    @db.Timestamp(6)
+  deliveries    deliveries[]
+  vendors       vendors?     @relation(fields: [vendor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model plans {
+  id            Int        @id
+  name          String     @db.VarChar
+  price         Decimal    @default(0) @db.Decimal(8, 2)
+  order_limit   Int?
+  features      String?    @db.VarChar
+  billing_cycle String?    @default("monthly") @db.VarChar
+  created_at    DateTime?  @db.Timestamp(6)
+  invoices      invoices[]
+  vendors       vendors[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model routes {
+  id             Int          @id @default(autoincrement())
+  vendor_id      Int?
+  driver_id      Int?
+  vehicle_id     Int?
+  date           DateTime     @db.Date
+  total_distance Int?
+  total_duration Int?
+  status         String       @default("planned") @db.VarChar
+  geometry       String?
+  created_at     DateTime?    @db.Timestamp(6)
+  deliveries     deliveries[]
+  drivers        drivers?     @relation(fields: [driver_id], references: [id], onUpdate: NoAction)
+  vehicles       vehicles?    @relation(fields: [vehicle_id], references: [id], onUpdate: NoAction)
+  vendors        vendors?     @relation(fields: [vendor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model vehicles {
+  id          Int      @id @default(autoincrement())
+  vendor_id   Int
+  type        String   @db.VarChar
+  capacity    Int
+  depot       String   @db.VarChar
+  plate_no    String   @db.VarChar
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  status      String   @default("AVAILABLE") @db.VarChar
+  routes      routes[]
+}
+
+model vendor {
+  id   Int    @id(map: "PK_931a23f6231a57604f5a0e32780") @default(autoincrement())
+  name String @db.VarChar
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model vendor_users {
+  id         Int       @id
+  vendor_id  Int?
+  name       String    @db.VarChar
+  email      String    @unique @db.VarChar
+  password   String    @db.VarChar
+  role       String    @db.VarChar
+  status     String    @default("active") @db.VarChar
+  created_at DateTime? @db.Timestamp(6)
+  vendors    vendors?  @relation(fields: [vendor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model vendors {
+  id             Int             @id
+  business_name  String          @db.VarChar
+  contact_person String?         @db.VarChar
+  email          String          @unique @db.VarChar
+  phone          Int?
+  address        String?         @db.VarChar
+  plan_id        Int?
+  status         String          @default("pending") @db.VarChar
+  approved_at    DateTime?       @db.Timestamp(6)
+  created_at     DateTime?       @db.Timestamp(6)
+  invoices       invoices[]
+  notifications  notifications[]
+  orders         orders[]
+  routes         routes[]
+  vendor_users   vendor_users[]
+  plans          plans?          @relation(fields: [plan_id], references: [id], onUpdate: NoAction)
+}
+
+model refresh_tokens {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  token_hash String   @db.VarChar
+  expires_at DateTime @db.Timestamp(6)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+}

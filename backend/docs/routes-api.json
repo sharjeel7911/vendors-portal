@@ -1,0 +1,32 @@
+{
+  "info": {
+    "name": "Routes API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Routes Summary",
+      "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/routes/summary", "host": ["{{baseUrl}}"], "path": ["api", "routes", "summary"] } }
+    },
+    {
+      "name": "Get Routes",
+      "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/routes", "host": ["{{baseUrl}}"], "path": ["api", "routes"] } }
+    },
+    {
+      "name": "Get Route",
+      "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/routes/1", "host": ["{{baseUrl}}"], "path": ["api", "routes", "1"] } }
+    },
+    {
+      "name": "Get Drivers",
+      "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/drivers", "host": ["{{baseUrl}}"], "path": ["api", "drivers"] } }
+    },
+    {
+      "name": "Get Vehicles",
+      "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/vehicles", "host": ["{{baseUrl}}"], "path": ["api", "vehicles"] } }
+    },
+    {
+      "name": "Get Stops",
+      "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/stops", "host": ["{{baseUrl}}"], "path": ["api", "stops"] } }
+    }
+  ]
+}
