@@ -1,63 +1,201 @@
 @import "tailwindcss";
 
-/* Tailwind's basic reset and default styles. */
-@tailwind base;
+/*
+  Design identity: "Dispatch Console"
+  A night-operations console for a delivery/routing vendor portal.
+  Ink-navy surfaces, a signal-amber beacon accent (the color of a vehicle's
+  hazard light / a radar blip), monospace for anything that is data
+  (order codes, coordinates, timestamps), a grotesk for everything else.
+*/
 
-/* Tailwind's component styles. */
-@tailwind components;
+/*
+  Theme: `data-theme="dark"` (default) and `data-theme="light"` on <html>
+  swap the values below. Everything else in the app is built on these
+  tokens via Tailwind's generated utilities (bg-beacon, text-text-muted,
+  border-border, etc.) — components never hardcode a color, so both
+  themes fall out of this one file. See components/theme.tsx for the
+  toggle + the pre-hydration script that sets the attribute.
+*/
 
-/* Tailwind's utility classes. */
-@tailwind utilities;
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
 
-/* Tell the browser that this website is designed for a light color scheme. */
-/* (Changed from dark to light as part of the light blue & white theme.) */
-html {
+  --color-bg: #0a1120;
+  --color-bg-elevated: #0e1830;
+  --color-surface: #131f38;
+  --color-surface-hover: #182746;
+  --color-border: #223250;
+  --color-border-strong: #33456b;
+  --color-text: #eaf0fb;
+  --color-text-muted: #93a4c2;
+  --color-text-faint: #5b6b8c;
+
+  --color-beacon: #ff9142;
+  --color-beacon-strong: #ffb377;
+  --color-beacon-soft: rgba(255, 145, 66, 0.14);
+
+  --color-signal: #33d6a6;
+  --color-signal-soft: rgba(51, 214, 166, 0.14);
+
+  --color-alert: #ff5c72;
+  --color-alert-soft: rgba(255, 92, 114, 0.14);
+
+  --color-info: #5ea1ff;
+  --color-info-soft: rgba(94, 161, 255, 0.14);
+
+  --color-bg-gradient-1: rgba(255, 145, 66, 0.07);
+  --color-bg-gradient-2: rgba(94, 161, 255, 0.06);
+}
+
+:root[data-theme="light"] {
   color-scheme: light;
+
+  --color-bg: #f4f6fb;
+  --color-bg-elevated: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-hover: #eef1f9;
+  --color-border: #dfe4f0;
+  --color-border-strong: #c2cadf;
+  --color-text: #101a30;
+  --color-text-muted: #4c5872;
+  --color-text-faint: #7c88a3;
+
+  --color-beacon: #e06a1f;
+  --color-beacon-strong: #c85b17;
+  --color-beacon-soft: rgba(224, 106, 31, 0.12);
+
+  --color-signal: #0f9c74;
+  --color-signal-soft: rgba(15, 156, 116, 0.12);
+
+  --color-alert: #d43a54;
+  --color-alert-soft: rgba(212, 58, 84, 0.1);
+
+  --color-info: #2f6fe0;
+  --color-info-soft: rgba(47, 111, 224, 0.1);
+
+  --color-bg-gradient-1: rgba(224, 106, 31, 0.05);
+  --color-bg-gradient-2: rgba(47, 111, 224, 0.05);
 }
 
-/* Set the main page background, grid effect, text color, and default font. */
+:root {
+  /* Fixed regardless of theme: the ink used for text sitting on top of a
+     filled accent color (buttons, filled badges). Beacon/signal are similarly
+     bright in both themes, so a dark ink reads correctly on either. */
+  --color-on-accent: #0b1120;
+
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-data: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+}
+
+@theme inline {
+  --color-bg: var(--color-bg);
+  --color-bg-elevated: var(--color-bg-elevated);
+  --color-surface: var(--color-surface);
+  --color-surface-hover: var(--color-surface-hover);
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-faint: var(--color-text-faint);
+  --color-beacon: var(--color-beacon);
+  --color-beacon-strong: var(--color-beacon-strong);
+  --color-beacon-soft: var(--color-beacon-soft);
+  --color-signal: var(--color-signal);
+  --color-signal-soft: var(--color-signal-soft);
+  --color-alert: var(--color-alert);
+  --color-alert-soft: var(--color-alert-soft);
+  --color-info: var(--color-info);
+  --color-info-soft: var(--color-info-soft);
+  --color-on-accent: var(--color-on-accent);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-data: var(--font-data);
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+html {
+  transition: color 0.15s ease;
+}
+
 body {
-  /* Main background color is now plain white (was dark before). */
-  background-color: #ffffff;
-
-  /* Draw two very light blue grid lines to create the dashboard background. */
-  /* (Changed from a faint amber tint to a faint light-blue tint.) */
+  background: var(--color-bg);
   background-image:
-    linear-gradient(rgba(138, 212, 246, 0.12) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(138, 212, 246, 0.12) 1px, transparent 1px);
-
-  /* Repeat the grid every 32 pixels. */
-  background-size: 32px 32px;
-
-  /* Main text color is now dark blue-grey so it stays readable on white. */
-  color: #17303a;
-
-  /* Use Space Grotesk first and fall back to common system fonts. */
-  font-family: 'Space Grotesk', system-ui, sans-serif;
+    radial-gradient(ellipse 70% 50% at 15% -10%, var(--color-bg-gradient-1), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 0%, var(--color-bg-gradient-2), transparent);
+  background-attachment: fixed;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-/* Use the IBM Plex Mono font for elements that have the mono class. */
-.font-mono {
-  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+::selection {
+  background: var(--color-beacon-soft);
+  color: var(--color-beacon-strong);
 }
 
-/* Make keyboard focus easy to see for accessibility. */
+/* Thin, quiet scrollbars that fit the console aesthetic */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Visible keyboard focus everywhere, in the beacon accent */
 :focus-visible {
-  /* Draw a light blue outline around the focused element (was amber before). */
-  outline: 2px solid #8ad4f6;
-
-  /* Keep the outline slightly away from the element. */
+  outline: 2px solid var(--color-beacon);
   outline-offset: 2px;
+  border-radius: 4px;
 }
 
-/* Respect users who prefer reduced motion. */
 @media (prefers-reduced-motion: reduce) {
-  /* Apply this rule to every element on the page. */
-  * {
-    /* Make animations almost instant. */
-    animation-duration: 0.01ms !important;
-
-    /* Make transitions almost instant as well. */
-    transition-duration: 0.01ms !important;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
+}
+
+@keyframes beacon-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--color-beacon-soft);
+  }
+  50% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+
+.animate-beacon {
+  animation: beacon-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes radar-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-radar {
+  animation: radar-sweep 6s linear infinite;
 }
