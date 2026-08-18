@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
-import { DriversController } from './drivers.controller';
 import { DriversService } from './drivers.service';
-import { PrismaModule } from '../prisma/prisma.module';
+import { DriversController } from './drivers.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Driver } from './drivers.entity';
+import { Vehicle } from '../vehicles/vehicles.entity';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [TypeOrmModule.forFeature([Driver, Vehicle])],
+  providers: [DriversService],
   controllers: [DriversController],
-  providers: [DriversService]
 })
 export class DriversModule {}
