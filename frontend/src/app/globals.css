@@ -1,26 +1,63 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Tailwind's basic reset and default styles. */
+@tailwind base;
+
+/* Tailwind's component styles. */
+@tailwind components;
+
+/* Tailwind's utility classes. */
+@tailwind utilities;
+
+/* Tell the browser that this website is designed for a light color scheme. */
+/* (Changed from dark to light as part of the light blue & white theme.) */
+html {
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Set the main page background, grid effect, text color, and default font. */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Main background color is now plain white (was dark before). */
+  background-color: #ffffff;
+
+  /* Draw two very light blue grid lines to create the dashboard background. */
+  /* (Changed from a faint amber tint to a faint light-blue tint.) */
+  background-image:
+    linear-gradient(rgba(138, 212, 246, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(138, 212, 246, 0.12) 1px, transparent 1px);
+
+  /* Repeat the grid every 32 pixels. */
+  background-size: 32px 32px;
+
+  /* Main text color is now dark blue-grey so it stays readable on white. */
+  color: #17303a;
+
+  /* Use Space Grotesk first and fall back to common system fonts. */
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+}
+
+/* Use the IBM Plex Mono font for elements that have the mono class. */
+.font-mono {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+/* Make keyboard focus easy to see for accessibility. */
+:focus-visible {
+  /* Draw a light blue outline around the focused element (was amber before). */
+  outline: 2px solid #8ad4f6;
+
+  /* Keep the outline slightly away from the element. */
+  outline-offset: 2px;
+}
+
+/* Respect users who prefer reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  /* Apply this rule to every element on the page. */
+  * {
+    /* Make animations almost instant. */
+    animation-duration: 0.01ms !important;
+
+    /* Make transitions almost instant as well. */
+    transition-duration: 0.01ms !important;
+  }
 }
