@@ -1,42 +1,47 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Vehicle } from './vehicles.entity';
-import { Repository } from 'typeorm';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class VehiclesService {
-  constructor(
-    @InjectRepository(Vehicle)
-    private vehicleRepository: Repository<Vehicle>,
-  ) {}
-  async create(vehicleData: Partial<Vehicle>): Promise<Vehicle> {
-    const vehicle = this.vehicleRepository.create(vehicleData);
-    return this.vehicleRepository.save(vehicle);
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(data: {
+    vendor_id: number;
+    type: string;
+    capacity: number;
+    depot: string;
+    plate_no: string;
+    status?: string;
+  }) {
+    return this.prisma.vehicles.create({ data });
   }
-  async fetchAllVehicles(): Promise<Vehicle[]> {
-    return this.vehicleRepository.find();
+
+  async fetchAllVehicles() {
+    return this.prisma.vehicles.findMany({ orderBy: { created_at: 'desc' } });
   }
-  async fetchOneVehicle(id: number): Promise<Vehicle> {
-    const vehicle = await this.vehicleRepository.findOneBy({ id });
+
+  async fetchOneVehicle(id: number) {
+    const vehicle = await this.prisma.vehicles.findUnique({ where: { id } });
     if (!vehicle) {
-      throw new NotFoundException('Vehicle with given id not found!');
+      throw new NotFoundException(`Vehicle with id ${id} not found`);
     }
     return vehicle;
   }
-  async update(id: number, updatedVehicle: Partial<Vehicle>): Promise<Vehicle> {
-    const vehicle = await this.vehicleRepository.findOneBy({ id });
-    if (!vehicle) {
-      throw new NotFoundException('Vehicle with given id not found!');
-    }
-    const updated = Object.assign(vehicle, updatedVehicle);
-    return this.vehicleRepository.save(updated);
+
+  async update(id: number, data: Partial<{
+    type: string;
+    capacity: number;
+    depot: string;
+    plate_no: string;
+    status: string;
+  }>) {
+    await this.fetchOneVehicle(id); // throws 404 if not found
+    return this.prisma.vehicles.update({ where: { id }, data });
   }
+
   async remove(id: number): Promise<{ message: string }> {
-    const vehicle = await this.vehicleRepository.findOneBy({ id });
-    if (!vehicle) {
-      throw new NotFoundException('Vehicle with given id not found!');
-    }
-    await this.vehicleRepository.remove(vehicle);
+    await this.fetchOneVehicle(id); // throws 404 if not found
+    await this.prisma.vehicles.delete({ where: { id } });
     return { message: 'Vehicle deleted successfully' };
   }
 }

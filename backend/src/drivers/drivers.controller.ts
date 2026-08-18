@@ -4,38 +4,64 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
 } from '@nestjs/common';
 import { DriversService } from './drivers.service';
-// import { Driver } from 'typeorm';
-import { Driver } from './drivers.entity';
 
-@Controller('drivers')
+@Controller('api/drivers')
 export class DriversController {
   constructor(private readonly driverService: DriversService) {}
 
   @Post()
-  async createDriver(@Body() body: Partial<Driver>): Promise<Driver> {
+  create(
+    @Body()
+    body: {
+      vendor_id: number;
+      name: string;
+      phone: string;
+      liscence_no: string;
+      working_hours: string;
+      status: string;
+      latitude: number;
+      longitude: number;
+      vehicle_id?: number | null;
+    },
+  ) {
     return this.driverService.create(body);
   }
+
   @Get()
-  async fetchAllDrivers(): Promise<Driver[]> {
+  fetchAll() {
     return this.driverService.fetchAllDrivers();
   }
+
   @Get(':id')
-  async fetchOneDrivers(@Param('id') id: number): Promise<Driver> {
+  fetchOne(@Param('id', ParseIntPipe) id: number) {
     return this.driverService.fetchOneDriver(id);
   }
+
   @Put(':id')
-  async updateDriver(
-    @Param('id') id: number,
-    @Body() body: Partial<Driver>,
-  ): Promise<Driver> {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body()
+    body: Partial<{
+      name: string;
+      phone: string;
+      liscence_no: string;
+      working_hours: string;
+      status: string;
+      latitude: number;
+      longitude: number;
+      vehicle_id: number | null;
+    }>,
+  ) {
     return this.driverService.update(id, body);
   }
+
   @Delete(':id')
-  async deleteDriver(@Param('id') id: number): Promise<{ message: string }> {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.driverService.remove(id);
   }
 }

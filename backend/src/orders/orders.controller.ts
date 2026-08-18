@@ -12,7 +12,7 @@ export class StopsController {
   }
 }
 
-@Controller('orders')
+@Controller('api/orders')
 export class OrdersController {
   constructor(private readonly orderService: OrdersService) {}
 

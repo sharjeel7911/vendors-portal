@@ -1,40 +1,61 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
-  Delete,
 } from '@nestjs/common';
 import { VehiclesService } from './vehicles.service';
-import { Vehicle } from './vehicles.entity';
 
-@Controller('vehicles')
+@Controller('api/vehicles')
 export class VehiclesController {
   constructor(private readonly vehicleService: VehiclesService) {}
 
   @Post()
-  async createVehicle(@Body() body: Partial<Vehicle>): Promise<Vehicle> {
+  create(
+    @Body()
+    body: {
+      vendor_id: number;
+      type: string;
+      capacity: number;
+      depot: string;
+      plate_no: string;
+      status?: string;
+    },
+  ) {
     return this.vehicleService.create(body);
   }
+
   @Get()
-  async fetchAllVehicles(): Promise<Vehicle[]> {
+  fetchAll() {
     return this.vehicleService.fetchAllVehicles();
   }
+
   @Get(':id')
-  async fetchOneVehicles(@Param('id') id: number): Promise<Vehicle> {
+  fetchOne(@Param('id', ParseIntPipe) id: number) {
     return this.vehicleService.fetchOneVehicle(id);
   }
+
   @Put(':id')
-  async updateVehicle(
-    @Param('id') id: number,
-    @Body() body: Partial<Vehicle>,
-  ): Promise<Vehicle> {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body()
+    body: Partial<{
+      type: string;
+      capacity: number;
+      depot: string;
+      plate_no: string;
+      status: string;
+    }>,
+  ) {
     return this.vehicleService.update(id, body);
   }
+
   @Delete(':id')
-  async deleteVehicle(@Param('id') id: number): Promise<{ message: string }> {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.vehicleService.remove(id);
   }
 }

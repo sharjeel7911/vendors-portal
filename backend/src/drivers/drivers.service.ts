@@ -3,103 +3,104 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Driver } from './drivers.entity';
-import { Vehicle } from '../vehicles/vehicles.entity';
-import { Repository } from 'typeorm';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class DriversService {
-  constructor(
-    @InjectRepository(Driver)
-    private driverRepository: Repository<Driver>,
-    @InjectRepository(Vehicle)
-    private vehicleRepository: Repository<Vehicle>,
-  ) {}
-  async create(driverData: Partial<Driver>): Promise<Driver> {
-    if (driverData.vehicle_id !== undefined && driverData.vehicle_id !== null) {
-      await this.markVehicleUnavailable(driverData.vehicle_id);
-    }
+  constructor(private readonly prisma: PrismaService) {}
 
-    const driver = this.driverRepository.create(driverData);
-    return this.driverRepository.save(driver);
+  async create(data: {
+    vendor_id: number;
+    name: string;
+    phone: string;
+    liscence_no: string;
+    working_hours: string;
+    status: string;
+    latitude: number;
+    longitude: number;
+    vehicle_id?: number | null;
+  }) {
+    if (data.vehicle_id != null) {
+      await this.markVehicleInUse(data.vehicle_id);
+    }
+    return this.prisma.drivers.create({ data });
   }
-  async fetchAllDrivers(): Promise<Driver[]> {
-    return this.driverRepository.find();
+
+  async fetchAllDrivers() {
+    return this.prisma.drivers.findMany({ orderBy: { created_at: 'desc' } });
   }
-  async fetchOneDriver(id: number): Promise<Driver> {
-    const driver = await this.driverRepository.findOneBy({ id });
+
+  async fetchOneDriver(id: number) {
+    const driver = await this.prisma.drivers.findUnique({ where: { id } });
     if (!driver) {
-      throw new NotFoundException('Driver with given id not found!');
+      throw new NotFoundException(`Driver with id ${id} not found`);
     }
     return driver;
   }
-  async update(id: number, updatedDriver: Partial<Driver>): Promise<Driver> {
-    const driver = await this.driverRepository.findOneBy({ id });
-    if (!driver) {
-      throw new NotFoundException('Driver with given id not found!');
+
+  async update(
+    id: number,
+    data: Partial<{
+      name: string;
+      phone: string;
+      liscence_no: string;
+      working_hours: string;
+      status: string;
+      latitude: number;
+      longitude: number;
+      vehicle_id: number | null;
+    }>,
+  ) {
+    const driver = await this.fetchOneDriver(id);
+
+    // Assigning a new vehicle
+    if (data.vehicle_id != null && data.vehicle_id !== driver.vehicle_id) {
+      await this.markVehicleInUse(data.vehicle_id);
     }
 
-    if (
-      updatedDriver.vehicle_id !== undefined &&
-      updatedDriver.vehicle_id !== null
-    ) {
-      const alreadyHadThisVehicle =
-        driver.vehicle_id === updatedDriver.vehicle_id;
-      await this.markVehicleUnavailable(
-        updatedDriver.vehicle_id,
-        alreadyHadThisVehicle,
-      );
-    }
-
-    if (
-      updatedDriver.vehicle_id === null &&
-      driver.vehicle_id !== null &&
-      driver.vehicle_id !== undefined
-    ) {
+    // Releasing a vehicle
+    if (data.vehicle_id === null && driver.vehicle_id != null) {
       await this.markVehicleAvailable(driver.vehicle_id);
     }
 
-    const updated = Object.assign(driver, updatedDriver);
-    return this.driverRepository.save(updated);
+    return this.prisma.drivers.update({ where: { id }, data });
   }
-  async remove(id: number): Promise<{ message: string }> {
-    const driver = await this.driverRepository.findOneBy({ id });
-    if (!driver) {
-      throw new NotFoundException('Driver with given id not found!');
-    }
 
-    if (driver.vehicle_id !== null && driver.vehicle_id !== undefined) {
+  async remove(id: number): Promise<{ message: string }> {
+    const driver = await this.fetchOneDriver(id);
+
+    if (driver.vehicle_id != null) {
       await this.markVehicleAvailable(driver.vehicle_id);
     }
 
-    await this.driverRepository.remove(driver);
+    await this.prisma.drivers.delete({ where: { id } });
     return { message: 'Driver deleted successfully' };
   }
 
-  private async markVehicleUnavailable(
-    vehicleId: number,
-    allowIfAlreadyTaken = false,
-  ): Promise<void> {
-    const vehicle = await this.vehicleRepository.findOneBy({ id: vehicleId });
+  // ── helpers ──────────────────────────────────────────────────────────────
+
+  private async markVehicleInUse(vehicleId: number): Promise<void> {
+    const vehicle = await this.prisma.vehicles.findUnique({
+      where: { id: vehicleId },
+    });
     if (!vehicle) {
-      throw new NotFoundException('Vehicle with given id not found!');
+      throw new NotFoundException(`Vehicle with id ${vehicleId} not found`);
     }
-    if (vehicle.isAvailable === false && !allowIfAlreadyTaken) {
+    if (vehicle.status !== 'AVAILABLE') {
       throw new BadRequestException(
         'This vehicle is already assigned to another driver and is not available.',
       );
     }
-    vehicle.isAvailable = false;
-    await this.vehicleRepository.save(vehicle);
+    await this.prisma.vehicles.update({
+      where: { id: vehicleId },
+      data: { status: 'IN_USE' },
+    });
   }
 
   private async markVehicleAvailable(vehicleId: number): Promise<void> {
-    const vehicle = await this.vehicleRepository.findOneBy({ id: vehicleId });
-    if (!vehicle) {
-      return;
-    }
-    vehicle.isAvailable = true;
-    await this.vehicleRepository.save(vehicle);
+    await this.prisma.vehicles.update({
+      where: { id: vehicleId },
+      data: { status: 'AVAILABLE' },
+    });
   }
 }
